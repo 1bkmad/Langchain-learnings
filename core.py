@@ -69,7 +69,6 @@ def run_llm(query:str)->Dict[str,Any]:
     response = agent.invoke({"messages":messages})
     answer = response["messages"][-1].content  # as there will be a lot of tool call, and messages so we take the latest
     context_docs = []
-    print("context aagya")
     for message in response["messages"]:
         #Check if this is a toolmessage with artifcat
         if isinstance(message, ToolMessage) and hasattr(message, "artifact"):
