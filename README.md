@@ -20,7 +20,10 @@ This repository contains a Streamlit demo application built with LangChain and R
 
 - Python 3.10+ (or compatible version)
 - `pip` installed
-- Suitable OpenAI or another LLM API key configured in environment variables if the implementation uses an LLM provider
+- **GROQ_API_KEY** - Get your free API key at https://console.groq.com/keys
+  - Free tier: Limited requests per day
+  - Paid: ~$0.05–$0.20 per 1M input tokens
+  - **Important**: Only your API key costs money; HuggingFace embeddings and ChromaDB are completely free
 
 ## Installation
 
@@ -38,11 +41,24 @@ source .venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 ```
 
-3. Set the required environment variables, for example:
+3. Set the required environment variables:
 
 ```bash
-export OPENAI_API_KEY="your_api_key"
+export GROQ_API_KEY="your_groq_api_key"
 ```
+
+To get a free Groq API key:
+1. Go to https://console.groq.com/keys
+2. Create an account or sign in
+3. Generate an API key
+4. Set it in your environment
+
+**Cost breakdown:**
+- ✅ HuggingFace embeddings: FREE (runs locally)
+- ✅ ChromaDB vector store: FREE (runs locally in `chroma_db/`)
+- ⚠️ Groq API: FREE tier available, then pay-as-you-go
+
+All embeddings and vector storage run locally on your machine. Only the LLM API calls (to Groq) incur costs beyond the free tier.
 
 ## Running the app
 
@@ -69,31 +85,38 @@ Then open the local Streamlit URL shown in the terminal.
   - Responsible for data collection and preprocessing.
   - Creates document chunks that are easier for embeddings to represent.
   - Persists the vector index for reuse.
+  - Uses Tavily API for web crawling (optional; requires TAVILY_API_KEY)
 
 - `core.py`
-  - Manages queries and retrieval.
+  - Manages queries and retrieval using MMR (Maximum Marginal Relevance) for better diversity.
   - Builds prompt context from relevant documents.
   - Calls the LLM with the retrieved context to generate final answers.
+  - Validates GROQ_API_KEY before starting.
 
 - `main.py`
   - Streamlit front-end.
   - Allows users to enter questions, view results, and explore the RAG flow.
+  - Displays retrieved sources with expandable source details.
 
-## Tips for interview questions
+## Costs & Deployment
 
-- Explain the RAG architecture: retrieval step + generation step.
-- Mention why vector embeddings are used instead of keyword search.
-- Describe how document chunks improve retrieval relevance.
-- Show that the app separates ingestion, retrieval, and UI concerns.
-- Note that Streamlit is used for rapid prototyping and demonstrating the user workflow.
+**Local Components (FREE):**
+- HuggingFace embeddings: Runs on your machine, no API calls
+- ChromaDB: Runs locally, stored in `chroma_db/` directory
 
-## Possible improvements
+**Cloud Components (Groq API):**
+- Only the LLM completions cost money
+- User provides their own GROQ_API_KEY
+- Groq free tier: ~5,000 free requests/month
+- Paid tier: ~$0.05–$0.20 per 1M input tokens
 
-- Add support for more data sources and file types.
-- Implement caching for repeated queries.
-- Add user session history and analytics.
-- Use a production-grade vector database like Pinecone, Milvus, or FAISS.
-- Add tests for ingestion, retrieval, and response generation.
+**To deploy publicly without charges:**
+1. Ask users to provide their own GROQ_API_KEY (don't commit API keys to repo)
+2. Document the free tier limits in your UI
+3. Add warnings about usage in the Streamlit app
+4. Use `.env.example` to show what env vars are needed
+
+
 
 ## License
 

@@ -2,8 +2,6 @@ from typing import Any, Dict, List
 
 import streamlit as st
 
-from core import run_llm
-
 
 def _format_sources(context_docs: List[Any]) -> List[str]:
     return [
@@ -15,6 +13,32 @@ def _format_sources(context_docs: List[Any]) -> List[str]:
 
 st.set_page_config(page_title="LangChain Documentation Helper", layout="centered")
 st.title("LangChain Documentation Helper")
+
+if "backend_ready" not in st.session_state:
+    st.session_state.backend_ready = False
+    st.session_state.run_llm = None
+
+if not st.session_state.backend_ready:
+    st.info("Booting the knowledge base and Groq model. This may take a moment...")
+    with st.spinner("Loading embeddings, vector index, and backend services..."):
+        try:
+            from core import run_llm as backend_run_llm
+        except Exception as e:
+            st.error("The backend could not be initialized.")
+            st.exception(e)
+            st.stop()
+
+        st.session_state.run_llm = backend_run_llm
+        st.session_state.backend_ready = True
+
+# Cost warning
+st.warning(
+    "⚠️ **Cost Notice**: This app uses Groq API for responses. "
+    "You must provide your own GROQ_API_KEY. "
+    "Free tier: ~5,000 requests/month. "
+    "Paid usage charged at ~$0.05–$0.20 per 1M tokens. "
+    "[Get free API key](https://console.groq.com/keys)"
+)
 
 with st.sidebar:
     st.subheader("Session")
@@ -48,7 +72,7 @@ if prompt:
     with st.chat_message("assistant"):
         try:
             with st.spinner("Retrieving docs and generating answer…"):
-                result: Dict[str, Any] = run_llm(prompt)
+                result: Dict[str, Any] = st.session_state.run_llm(prompt)
                 answer = str(result.get("answer", "")).strip() or "(No answer returned.)"
                 sources = _format_sources(result.get("context", []))
 
