@@ -110,11 +110,6 @@ Then open the local Streamlit URL shown in the terminal.
 - Groq free tier: ~5,000 free requests/month
 - Paid tier: ~$0.05–$0.20 per 1M input tokens
 
-**To deploy publicly without charges:**
-1. Ask users to provide their own GROQ_API_KEY (don't commit API keys to repo)
-2. Document the free tier limits in your UI
-3. Add warnings about usage in the Streamlit app
-4. Use `.env.example` to show what env vars are needed
 
 
 
